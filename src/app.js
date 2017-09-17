@@ -1,11 +1,15 @@
 import React, { Component } from 'react';
 import { View } from 'react-native';
 import firebase from 'firebase';
-import { Header } from './component/common';
+import { Header, Button, Spinner } from './component/common';
 import LoginForm from './component/LoginForm';
 
 class App extends Component {
 	
+
+	state = { loggedIn: false };
+
+
 	componentWillMount() {
 		firebase.initializeApp(
 				{
@@ -18,6 +22,33 @@ class App extends Component {
 									  
 				}
 		);
+
+
+
+		firebase.auth().onAuthStateChanged((user) => {
+			if (user) {
+				this.setState({ loggedIn: true });
+			} else {
+				this.setState({ loggedIn: false });
+			}
+		});
+	}
+
+
+	renderContent() {
+
+		switch (this.state.loggedIn) {
+			case true:
+				return (
+						<Button onPress={() => firebase.auth().signOut()}>
+							Log Out
+						</Button>
+				       );
+			case false:
+				return <LoginForm />;
+			default:
+				return <Spinner size="small"/>
+		}	
 	}
 
 
@@ -25,7 +56,7 @@ class App extends Component {
 		return (
 				<View>
 					<Header headerText="Wynn Auth" />
-					<LoginForm />
+					{this.renderContent()}
 				</View>
 		       )
 	}
